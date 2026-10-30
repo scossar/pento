@@ -2,8 +2,6 @@ defmodule PentoWeb.WrongLive do
   use PentoWeb, :live_view
 
   def mount(_params, _session, socket) do
-    IO.puts("PentoWeb.WrongLive mount function called")
-
     target =
       if connected?(socket) do
         Enum.random(1..10)
@@ -11,13 +9,16 @@ defmodule PentoWeb.WrongLive do
         nil
       end
 
+    user = socket.assigns.current_scope.user
+
     {:ok,
      assign(
        socket,
        score: 0,
        message: "Make a guess:",
        target: target,
-       reset: false
+       reset: false,
+       current_user: user
      )}
   end
 
@@ -43,6 +44,9 @@ defmodule PentoWeb.WrongLive do
             phx-value-number={n}
           >{n}</.link>
         <% end %>
+      </h2>
+      <h2>
+        {@current_user.email}
       </h2>
     </main>
     """
