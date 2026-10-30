@@ -2,12 +2,21 @@ defmodule PentoWeb.WrongLive do
   use PentoWeb, :live_view
 
   def mount(_params, _session, socket) do
+    IO.puts("PentoWeb.WrongLive mount function called")
+
+    target =
+      if connected?(socket) do
+        Enum.random(1..10)
+      else
+        nil
+      end
+
     {:ok,
      assign(
        socket,
        score: 0,
        message: "Make a guess:",
-       target: Enum.random(1..10),
+       target: target,
        reset: false
      )}
   end
@@ -21,7 +30,7 @@ defmodule PentoWeb.WrongLive do
         <%= if @reset do %>
           <.link
             class="btn btn-secondary"
-            patch="#"
+            patch={~p"/guess"}
           >Reset</.link>
         <% end %>
       </h2>
