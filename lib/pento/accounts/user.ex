@@ -4,6 +4,7 @@ defmodule Pento.Accounts.User do
 
   schema "users" do
     field :email, :string
+    field :username, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
@@ -54,6 +55,25 @@ defmodule Pento.Accounts.User do
     else
       changeset
     end
+  end
+
+  @doc """
+  A user changeset for the username.
+  """
+  def username_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:username])
+    |> validate_username(opts)
+  end
+
+  defp validate_username(changeset, _opts) do
+    changeset =
+      changeset
+      |> unsafe_validate_unique(:email, Pento.Repo)
+      |> validate_length(:username, min: 2)
+      |> validate_length(:username, max: 12)
+
+    changeset
   end
 
   @doc """
