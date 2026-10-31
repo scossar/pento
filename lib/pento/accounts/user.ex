@@ -76,6 +76,12 @@ defmodule Pento.Accounts.User do
     changeset
   end
 
+  def registration_changeset(user, attrs, opts \\ []) do
+    user
+    |> email_changeset(attrs, opts)
+    |> username_changeset(attrs, opts)
+  end
+
   @doc """
   A user changeset for changing the password.
 
