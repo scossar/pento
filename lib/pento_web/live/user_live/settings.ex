@@ -31,6 +31,25 @@ defmodule PentoWeb.UserLive.Settings do
       <div class="divider" />
 
       <.form
+        for={@username_form}
+        id="username_form"
+        phx-submit="update_username"
+        phx-change="validate_username"
+      >
+        <.input
+          field={@username_form[:username]}
+          type="text"
+          label="Username"
+          autocomplete="username"
+          spellcheck="false"
+          required
+        />
+        <.button variant="primary" phx-disable-with="Changing...">Change Username</.button>
+      </.form>
+
+      <div class="divider" />
+
+      <.form
         for={@password_form}
         id="password_form"
         action={~p"/users/update-password"}
@@ -86,12 +105,14 @@ defmodule PentoWeb.UserLive.Settings do
   def mount(_params, _session, socket) do
     user = socket.assigns.current_scope.user
     email_changeset = Accounts.change_user_email(user, %{}, validate_unique: false)
+    username_changeset = Accounts.change_user_username(user, %{})
     password_changeset = Accounts.change_user_password(user, %{}, hash_password: false)
 
     socket =
       socket
       |> assign(:current_email, user.email)
       |> assign(:email_form, to_form(email_changeset))
+      |> assign(:username_form, to_form(username_changeset))
       |> assign(:password_form, to_form(password_changeset))
       |> assign(:trigger_submit, false)
 
@@ -109,6 +130,32 @@ defmodule PentoWeb.UserLive.Settings do
       |> to_form()
 
     {:noreply, assign(socket, email_form: email_form)}
+  end
+
+  # NOTE: I'm getting ahead of myself here, not yet fully implemented:
+  def handle_event("update_username", params, socket) do
+    user = socket.assigns.current_scope.user
+
+    %{"user" => user_params} = params
+
+    case Accounts.change_user_username(user, user_params) do
+      %{valid?: true} = _changeset ->
+        {:noreply, socket |> put_flash(:info, "Valid username update")}
+
+      _ ->
+        {:noreply, socket |> put_flash(:error, "Invalid username update")}
+    end
+  end
+
+  def handle_event("validate_username", params, socket) do
+    %{"user" => user_params} = params
+
+    username_form =
+      socket.assigns.current_scope.user
+      |> Accounts.change_user_username(user_params)
+      |> to_form()
+
+    {:noreply, assign(socket, username_form: username_form)}
   end
 
   def handle_event("update_email", params, socket) do

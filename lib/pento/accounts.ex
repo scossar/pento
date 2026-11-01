@@ -76,7 +76,7 @@ defmodule Pento.Accounts do
   """
   def register_user(attrs) do
     %User{}
-    |> User.email_changeset(attrs)
+    |> User.registration_changeset(attrs)
     |> Repo.insert()
   end
 
@@ -130,6 +130,22 @@ defmodule Pento.Accounts do
         _ -> {:error, :transaction_aborted}
       end
     end)
+  end
+
+  @doc """
+  Returns an %Ecto.Changeset{} for changing the user username.
+  """
+  def change_user_username(user, attrs \\ %{}, opts \\ []) do
+    User.username_changeset(user, attrs, opts)
+  end
+
+  @doc """
+  Updates the user username.
+  """
+  def update_user_username(user, attrs, opts \\ []) do
+    user
+    |> User.username_changeset(attrs, opts)
+    |> Repo.update()
   end
 
   @doc """
